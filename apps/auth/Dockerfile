@@ -26,4 +26,4 @@ RUN pnpm install --prod
 
 COPY --from=development /usr/src/app/dist ./dist
 
-CMD ["node", "dist/apps/reservation/main"]
+CMD ["node", "dist/apps/auth/main"]
