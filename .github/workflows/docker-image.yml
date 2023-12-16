@@ -1,18 +1,32 @@
-name: Docker Image CI
+name: NestJs CI
 
 on:
   push:
-    branches: [ "master" ]
+    branches:
+      - master
+      - features/**
+      - dependabot/**
   pull_request:
-    branches: [ "master" ]
+    branches:
+      - master
 
 jobs:
-
-  build:
-
+  docker:
+    timeout-minutes: 10
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Build the Docker image
-      run: docker build ../../ -t sleepr_reservation
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Start containers
+        run: docker-compose -f "docker-compose.yaml" up -d --build
+
+      - name: Install node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Stop containers
+        if: always()
+        run: docker-compose -f "docker-compose.yaml" down
