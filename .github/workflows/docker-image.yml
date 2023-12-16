@@ -1,41 +1,35 @@
-name: Docker Compose
+name: NestJs CI
 
 on:
   push:
     branches:
       - master
+      - features/**
+      - dependabot/**
   pull_request:
     branches:
       - master
 
 jobs:
-  build:
+  docker:
+    timeout-minutes: 10
     runs-on: ubuntu-latest
 
-    services:
-      docker:
-        image: docker:20.10.5
-        options: --health-cmd="docker info > /dev/null || exit 1" --health-interval=10s --health-timeout=5s --health-retries=3
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - name: Set up Docker Compose
-        run: docker-compose -v
+      - name: Start containers
+        run: docker-compose -f "docker-compose.yaml" up -d --build
 
-      - name: Build and run Docker Compose
-        run: |
-          docker-compose -f docker-compose.yaml up --build -d
-          docker-compose -f docker-compose.yaml ps
-          docker-compose -f docker-compose.yaml logs --follow
+      - name: Install node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
 
-      - name: Wait for services to start
-        run: sleep 30 # Adjust this based on your services' startup time
+      - name: Install dependencies
+        run: pnpm install
 
-      - name: Run tests on your_service_name
-        run: |
-          docker exec -it your_service_name pnpm run test
-
-      - name: Tear down Docker Compose
-        run: docker-compose -f docker-compose.yaml down
+      - name: Stop containers
+        if: always()
+        run: docker-compose -f "docker-compose.yaml" down
