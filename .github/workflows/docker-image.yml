@@ -27,9 +27,6 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install dependencies
-        run: npm install -g pnpm & pnpm install
-
       - name: Stop containers
         if: always()
         run: docker-compose -f "docker-compose.yaml" down
