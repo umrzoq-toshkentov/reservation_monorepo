@@ -28,7 +28,7 @@ jobs:
           node-version: 14.x
 
       - name: Install dependencies
-        run: pnpm install
+        run: npm install -g pnpm & pnpm install
 
       - name: Stop containers
         if: always()
