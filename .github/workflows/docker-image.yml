@@ -1,23 +1,35 @@
-name: NestJs CI
+name: Docker Compose CI
 
 on:
   push:
     branches:
-      - master
-      - features/**
-      - dependabot/**
-  pull_request:
-    branches:
-      - master
+      - main
 
 jobs:
-  docker:
-    timeout-minutes: 10
+  build:
     runs-on: ubuntu-latest
 
+    services:
+      docker:
+        image: docker:20.10.5
+        ports:
+          - 3000:3000
+          - 3001:3001
+        options: --health-cmd="curl -f http://localhost:3000/ || exit 1" --health-interval=10s --health-timeout=5s --health-retries=3
+
     steps:
-      - uses: actions/checkout@v3
-      - uses: adambirds/docker-compose-action@v1.3.0
-        with:
-          compose-file: '../docker-compose.yml'
-          test-container: 'reservations-service'
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Build and run Docker Compose
+        run: |
+          docker-compose -f docker-compose.yaml up --build -d
+          docker-compose -f docker-compose.yaml ps
+          docker-compose -f docker-compose.yaml logs --follow
+
+      - name: Run tests (replace with your test commands)
+        run: |
+          docker exec -it your_container_name pnpm run test
+
+      - name: Tear down Docker Compose
+        run: docker-compose -f docker-compose.yaml down
