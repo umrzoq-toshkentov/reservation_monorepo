@@ -1,4 +1,4 @@
-name: Docker Compose CI
+name: Docker Compose
 
 on:
   push:
@@ -15,14 +15,14 @@ jobs:
     services:
       docker:
         image: docker:20.10.5
-        ports:
-          - 3000:3000
-          - 3001:3001
-        options: --health-cmd="curl -f http://localhost:3000/ || exit 1" --health-interval=10s --health-timeout=5s --health-retries=3
+        options: --health-cmd="docker info > /dev/null || exit 1" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+
+      - name: Set up Docker Compose
+        run: docker-compose -v
 
       - name: Build and run Docker Compose
         run: |
@@ -30,9 +30,12 @@ jobs:
           docker-compose -f docker-compose.yaml ps
           docker-compose -f docker-compose.yaml logs --follow
 
-      - name: Run tests (replace with your test commands)
+      - name: Wait for services to start
+        run: sleep 30 # Adjust this based on your services' startup time
+
+      - name: Run tests on your_service_name
         run: |
-          docker exec -it your_container_name pnpm run test
+          docker exec -it your_service_name pnpm run test
 
       - name: Tear down Docker Compose
         run: docker-compose -f docker-compose.yaml down
