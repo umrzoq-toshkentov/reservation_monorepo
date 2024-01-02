@@ -5,7 +5,6 @@ import { PaymentsService } from './payments.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import * as Joi from 'joi';
 import { LoggerModule, NOTIFICATIONS_SERVICE } from '@app/common';
-import { NotificationsModule } from 'apps/notifications/src/notifications.module';
 
 @Module({
   imports: [
